@@ -13,13 +13,14 @@ export class AppComponent implements OnInit {
   _fileName = '';
   _columns = [];
   _data = [];
-  _dataErrors = [];
+  _dataErrorsCount = 0;
   _showCSVDataError = false;
   _cloneData = [];
   customHeaders: any = [];
   _show = false;
   _start: number = 0;
   _pageSize: number = 3;
+  _showAll = true;
 
   constructor() { }
 
@@ -43,6 +44,16 @@ export class AppComponent implements OnInit {
   }
   showError() {
     this._showCSVDataError = !this._showCSVDataError;
+  }
+  showErrorResults() {
+    if (this._showAll) {
+      this._cloneData = this._data.slice(0, this._pageSize);
+    }
+    else {
+      this._cloneData = this._data.slice(0, this._pageSize);
+    }
+
+    this._showAll = !this._showAll;
   }
   async onSubmit() {
     var today = new Date();
@@ -86,14 +97,16 @@ export class AppComponent implements OnInit {
     ref._fileName = e.target.files[0].name;
     ref._filemb = e.target.files[0].size / 1000000;
     let i = 1;
-        Papa.parse(e.target.files[0], {
+    Papa.parse(e.target.files[0], {
       worker: ref._filemb > 50 ? true : false,
       header: true,
       step: function (row) {
         row.data['0'] = i;
         row.data['Error'] = 'Passed';
-        if (row.errors.length > 0)
+        if (row.errors.length > 0) {
+          ref._dataErrorsCount++;
           row.data['Error'] = 'Failed:' + JSON.stringify(row.errors);
+        }
         ref._data.push(row.data);
         i++;
       },

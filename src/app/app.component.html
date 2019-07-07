@@ -79,8 +79,14 @@
         </ul>
     </nav>
     <hr />
-    <button type="submit" class="btn btn-outline-primary mr-1" (click)="onSubmit()">Submit</button>
-    <button type="submit" class="btn btn-outline-primary"
-        (click)="showError()">{{!this._showCSVDataError?'Show Error':'Hide Error'}}</button>
+    <button type="submit" *ngIf="_dataErrorsCount===0" class="btn btn-outline-primary mr-1"
+        (click)="onSubmit()">Submit</button>
+    <div *ngIf="_dataErrorsCount>0" class="alert alert-danger" role="alert">
+        <strong>Not a valid CSV file uploaded, Please fix your CSV.</strong>
+    </div>
+    <button type="submit" *ngIf="_dataErrorsCount >0" class="btn btn-outline-primary mr-1"
+        (click)="showError()">{{!_showCSVDataError?'Show Error':'Hide Error'}}</button>
+    <button type="submit" *ngIf="_dataErrorsCount>0" class="btn btn-outline-primary"
+        (click)="showErrorResults()">{{!_showAll?'Show only errors':'Show all'}}</button>
 
 </div>
