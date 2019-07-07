@@ -1,0 +1,4 @@
+The dropDatabase() Method
+use mydb
+db.dropDatabase()
+----------------
