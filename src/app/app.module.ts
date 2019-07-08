@@ -5,6 +5,9 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { AppComponent } from './app.component';
 import { JSONTableModule } from 'angular-json-table';  // import the Module.
 import { AgGridModule } from 'ag-grid-angular';
+import { AppRoutingModule }     from './app-routing.module';
+import { FileUploadComponent } from './file-upload/file-upload.component';
+import { FileUpdateComponent } from './file-update/file-update.component';
 
 
 
@@ -13,12 +16,16 @@ import { AgGridModule } from 'ag-grid-angular';
 @NgModule({
   declarations: [
     AppComponent,
+  
+    FileUploadComponent,
+    FileUpdateComponent,
    
   ],
   imports: [
     BrowserModule,   
     BrowserAnimationsModule,   
-    FormsModule,    
+    FormsModule,   
+    AppRoutingModule, 
     ReactiveFormsModule,
     AgGridModule.withComponents([]) ,
     JSONTableModule
