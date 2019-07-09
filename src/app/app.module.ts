@@ -8,6 +8,7 @@ import { AgGridModule } from 'ag-grid-angular';
 import { AppRoutingModule }     from './app-routing.module';
 import { FileUploadComponent } from './file-upload/file-upload.component';
 import { FileUpdateComponent } from './file-update/file-update.component';
+import { PipeNumber } from './pipe/pipe.number';
 
 
 
@@ -19,7 +20,7 @@ import { FileUpdateComponent } from './file-update/file-update.component';
   
     FileUploadComponent,
     FileUpdateComponent,
-   
+    PipeNumber   
   ],
   imports: [
     BrowserModule,   

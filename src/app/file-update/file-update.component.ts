@@ -7,22 +7,18 @@ import axios from 'axios';
   styleUrls: ['./file-update.component.css']
 })
 export class FileUpdateComponent implements OnInit {
-  _filemb: number = 0;
-  _fileName = '';
-  _columns = [];
-  _data = [];
-  _dataErrorsCount = 0;
-  _showCSVDataError = false;
-  _cloneData = [];
-  customHeaders: any = [];
-  _show = false;
-  _start: number = 0;
-  _pageSize: number = 3;
-  _showAll = true;
   _mongoCols = [];
   _mongoDocs = [];
   _mongoDocsCol = [];
   _cloneDocsData = [];
+  _paginationCount: number = 5;
+  _defaultPaginationCount: number = 5;
+  _pageSize: number = 3;
+  _numericCount: number = 0;
+  _nextCounter: number = 0;
+  _start: number = 0;
+  _selectedPage: number = 0;
+
   constructor() { }
 
   ngOnInit() {
@@ -32,9 +28,7 @@ export class FileUpdateComponent implements OnInit {
     }).then(response => {
       response.data.collections.map((x) => {
         this._mongoCols.push(x);
-      })
-      console.log(this._mongoCols);
-      console.log(response.data);
+      });
     })
       .catch(error => {
         console.log(error.message)
@@ -42,32 +36,6 @@ export class FileUpdateComponent implements OnInit {
   }
   async onColsSelect(e) {
     if (e.target.value !== '') {
-      console.log(e.target.value);
-      // axios({
-      //   method: 'get',
-      //   url: 'http://localhost:5000/getColDocs',
-      //   params: {
-      //     first: 1,
-      //     last: 5000 // This is the body part          
-      //   }
-      // }).then(response => {
-      //   console.log(response);
-      // });
-      //   this._mongoDocs = response.data.data;
-      //   this._cloneDocsData = this._mongoDocs.slice(0, 3);
-      //   this._mongoDocsCol = Object.keys(this._mongoDocs[0]).map((key) => {
-      //     return {
-      //       headerName: key,
-      //       field: key
-      //     }
-      //   });
-      //   console.log(this._mongoDocsCol);
-      //   console.log(this._mongoDocs);
-      // })
-      //   .catch(error => {
-      //     console.log(error.message)
-      //   })
-
       let id = -1;
       let limit = 1;
       let isRecordsExist = true;
@@ -79,7 +47,6 @@ export class FileUpdateComponent implements OnInit {
           id = res['data'][res['data'].length - 1]['_id'];
           if (id === 0) {
             limit = parseInt(res['data'][res['data'].length - 1]['chunk_size']);
-            console.log(limit);
           }
           else {
             this._mongoDocs.push(res['data']);
@@ -90,29 +57,39 @@ export class FileUpdateComponent implements OnInit {
         this._mongoDocs = this._mongoDocs.reduce(function (a, b) {
           return a.concat(b);
         });
-      console.log(this._mongoDocs);
 
-      this._cloneDocsData = this._mongoDocs.slice(0, 3);
+      this._cloneDocsData = this._mongoDocs.slice(0, this._pageSize);
+      // Set _paginationCount for default
+      this._paginationCount = this.get_paginationCount(this._mongoDocs.length);
+
+
       this._mongoDocsCol = Object.keys(this._cloneDocsData[0]).map((key) => {
         return {
           headerName: key,
           field: key
         }
       });
-      // console.log(this._mongoDocsCol);
-      // console.log(this._mongoDocs.flat());
 
     }
   }
 
-  getMongoDocs = (id, limit, colName) => {
+  get_paginationCount(dataLength: number): number {
+    console.log(dataLength / this._pageSize)
+    console.log(parseInt((dataLength / this._pageSize).toString()));
+    let totalCount: number = dataLength / this._pageSize;
+    this._numericCount = parseInt((dataLength / this._pageSize).toString());
+    this._numericCount = totalCount > this._numericCount ? (this._numericCount + 1) : this._numericCount;
+    return this._numericCount < this._defaultPaginationCount ? this._numericCount : this._defaultPaginationCount;
+  }
+
+  getMongoDocs = (id: number, limit: number, colName: string) => {
     return new Promise((resolve, reject) => {
       axios({
         method: 'get',
         url: 'http://localhost:5000/getColDocs',
         params: {
           id: id,
-          limit: limit, // This is the body part    
+          limit: limit,
           colName: colName
         }
       }).then(response => {
@@ -122,5 +99,49 @@ export class FileUpdateComponent implements OnInit {
           return reject(error.message)
         })
     })
+  }
+  onNextCounter() {
+    this._nextCounter++;
+    this._nextCounter = this._nextCounter > this._numericCount ? this._numericCount : this._nextCounter;
+    this._selectedPage=4;
+
+
+  }
+  onPreviousCounter() {
+    this._nextCounter--;
+    this._nextCounter = this._nextCounter < 0 ? 0 : this._nextCounter;
+    this._selectedPage=0;
+
+
+  }
+  onFirstSelect() {
+    this._nextCounter = 0;
+
+    this._start = this._nextCounter * this._pageSize;
+    this._cloneDocsData = this._mongoDocs.slice(this._start, this._start + this._pageSize);
+    this._selectedPage=0;
+
+  }
+  onLastSelect() {
+    this._nextCounter = this._numericCount - 5;
+
+    this._nextCounter = this._nextCounter < 0 ? 0 : this._nextCounter;
+    this._start = (this._numericCount * this._pageSize) - this._pageSize;
+    this._cloneDocsData = this._mongoDocs.slice(this._start);
+    this._selectedPage=4;
+
+  }
+  pageSize(e) {
+    this._nextCounter = 0;
+    this._pageSize = parseInt(e.target.value);
+    this._cloneDocsData = this._mongoDocs.slice(0, this._pageSize);
+    this._paginationCount = this.get_paginationCount(this._mongoDocs.length);
+  }
+  onPageSelect(e) {
+    
+    this._selectedPage = parseInt(e);    
+    this._start = parseInt(e + this._nextCounter) * this._pageSize;
+    this._cloneDocsData = this._mongoDocs.slice(this._start, this._start + this._pageSize);
+
   }
 }
