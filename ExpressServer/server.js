@@ -85,7 +85,7 @@ app.get('/getColDocs', (req, res) => {
             var dbo = db.db("csv");
             //  var query = { $and: [{ _id: { $gte: parseFloat(req.query.first) } }, { _id: { $lte: parseFloat(req.query.last) } }] }
             var query = { _id: { $gt: parseInt(req.query.id) } };
-            dbo.collection(req.query.colName).find(query).sort({_id:1}).limit(parseInt(req.query.limit)).toArray(function (err, result) {
+            dbo.collection(req.query.colName).find(query).sort({ _id: 1 }).limit(parseInt(req.query.limit)).toArray(function (err, result) {
                 if (err) throw err;
                 //console.log(result);
                 //res.send(result);
@@ -95,6 +95,55 @@ app.get('/getColDocs', (req, res) => {
                 // res.json({ data: 3 });
                 db.close();
             });
+        }
+    });
+
+});
+
+app.post('/updelrecords', (req, res) => {
+    MongoClient.connect(url, function (err, db) {
+        try {
+            if (err) {
+                res.json({ error: + '- "Please check you db connection parameters' });
+                console.log("Please check you db connection parameters");
+            } else {
+                console.log("Connection Succeeded!");
+                var dbo = db.db("csv");
+                var myobj = req.body.foo;
+                // console.log('Gaurav')
+                // console.log(myobj)
+                myobj.forEach((data, index, arr) => {
+                    //console.log(data._id)
+                    //console.log(index)
+                    //console.log(arr)
+                    if (data.isDeleted == true) {
+                        var myquery = { _id: data._id };
+                        dbo.collection(req.body.mongoColName).deleteOne(myquery, function (err, obj) {
+                            if (err) throw err;
+                            db.close();
+                            console.log("1 document deleted");
+                        });
+                    }
+                    else if (data.isDeleted == false) {
+                        var myquery = { _id: data._id };
+                        var newvalues = { $set: data };
+                        dbo.collection(req.body.mongoColName).updateOne(myquery, newvalues, function (err, res) {
+                            if (err) throw err;
+                            console.log("1 document updated");
+                            db.close();
+                        });
+                    }
+                })
+
+                res.json({ message: 'Hello' });
+            }
+        }
+        catch (err) {
+            console.log(err);
+            res.json({ error: err.message });
+        }
+        finally {
+            db.close();
         }
     });
 

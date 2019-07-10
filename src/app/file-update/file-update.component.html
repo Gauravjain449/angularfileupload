@@ -13,6 +13,7 @@
   <table class="table table-bordered table-sm">
     <thead class="thead-dark">
       <tr>
+        <th>Action</th>
         <th *ngFor="let col of _mongoDocsCol">
           <small>
             <!-- <input type="text" class="form-control" placeholder={{col}} /> -->
@@ -22,10 +23,23 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let d of _cloneDocsData">
+      <tr *ngFor="let d of _cloneDocsData;let _index= index;">
+        <td>
+          <i *ngIf="d._id!==_editRowNumber" class=" fa fa-pencil-square-o" aria-hidden="true" title="Edit"
+            (click)="OnEdit(d)"></i>
+          <i *ngIf="d._id===_editRowNumber" class="fa fa-floppy-o" aria-hidden="true" title="Save"
+            (click)="OnSave(d)"></i>
+          |
+          <i *ngIf="d._id!==_editRowNumber" class="fa fa-trash" aria-hidden="true" (click)="OnDelete(d,_index)"
+            title="Delete"></i>
+          <i *ngIf="d._id===_editRowNumber" class="fa fa-ban" aria-hidden="true" (click)="OnCancel(_index)"
+            title="Cancel"></i>
+        </td>
         <td class="col-sm-9" *ngFor="let col of _mongoDocsCol">
-          <small>
-            {{d[col.field]}}</small></td>
+          <small *ngIf="d._id!==_editRowNumber || col.field==='_id'">{{d[col.field]}}</small>
+          <small *ngIf="d._id===_editRowNumber && col.field!=='_id'"> <input type="text" class="form-control"
+              value={{d[col.field]}} [(ngModel)]="d[col.field]" /></small>
+        </td>
       </tr>
     </tbody>
 
@@ -56,19 +70,21 @@
         class="{{row_no===_selectedPage && 'page-item active' || 'page-item ' }}"> <a (click)=" onPageSelect(row_no)"
           class="page-link">{{row_no + 1+_nextCounter}}</a></li>
       <!-- *ngIf="(_nextCounter+5!==this._numericCount)" -->
-      <li class="page-item" *ngIf="(_nextCounter+5!==this._numericCount) && (_defaultPaginationCount < _numericCount)"
+      <li class="page-item" *ngIf="(_nextCounter+5!==_numericCount) && (_defaultPaginationCount < _numericCount)"
         (click)=" onNextCounter()">
         <a class="page-link" aria-label="Next">
           <span aria-hidden="true">&raquo;</span>
           <span class="sr-only">Next</span>
         </a>
       </li>
-      <li class="page-item" *ngIf="(_nextCounter+5!==this._numericCount) && (_defaultPaginationCount < _numericCount)">
+      <li class="page-item" *ngIf="(_nextCounter+5!==_numericCount) && (_defaultPaginationCount < _numericCount)">
         <a class="page-link" (click)="onLastSelect()">Last</a></li>
       <li class="page-item disabled"><a class="page-link">Total Records {{_mongoDocs.flat().length}}</a></li>
 
     </ul>
   </nav>
   <hr />
-
+  <button type="submit" *ngIf="_trackData.length>0" class="btn btn-outline-primary mr-1"
+    (click)="onSubmit()">Submit</button>
+  <app-confirm-dialog></app-confirm-dialog>
 </div>
