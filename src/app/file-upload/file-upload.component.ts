@@ -14,7 +14,8 @@ export class FileUploadComponent implements OnInit {
   _fileName = '';
   // _mongoDocsCol = [];
   _mongoDocs = [];
-  _csvData = [];
+  _dataErrors = [];
+
   _dataErrorsCount = 0;
   // _showCSVDataError = false;
   // _cloneData = [];
@@ -60,20 +61,25 @@ export class FileUploadComponent implements OnInit {
   //   this._showAll = !this._showAll;
   // }
   async onSubmit() {
-    // var today = new Date();
-    // let chunk_size: number = this._filemb <= 1.5 ? this._mongoDocs.length + 1 : (this._mongoDocs.length / (this._filemb * 2));
-    // // let mongoColName = this._fileName.replace(/[^-a-zA-Z0-9_ ]/g, '') + '_' + today.getFullYear() + (today.getMonth() + 1) + today.getDate() + today.getHours() + today.getMinutes() + today.getSeconds();
-    // let mongoColName = this._fileName.replace(/[^-a-zA-Z0-9_ ]/g, '');
-    // let arrData = []
-    // this._mongoDocs.unshift({ '_id': 0, 'chunk_size': chunk_size })
-    // for (let index = 0; index < this._mongoDocs.length; index += chunk_size) {
-    //   arrData.push(this._mongoDocs.slice(index, index + chunk_size));
-    // }
-    // for (let i = 0; i < arrData.length; i++) {
-    //   await this.getTitle(arrData[i], i, mongoColName).then((res) => {
-    //     console.log(res);
-    //   })
-    // }
+    var today = new Date();
+    let chunk_size: number = this._filemb <= 1.5 ? this._mongoDocs.length + 1 : (this._mongoDocs.length / (this._filemb * 2));
+    // let mongoColName = this._fileName.replace(/[^-a-zA-Z0-9_ ]/g, '') + '_' + today.getFullYear() + (today.getMonth() + 1) + today.getDate() + today.getHours() + today.getMinutes() + today.getSeconds();
+    let mongoColName = this._fileName.replace(/[^-a-zA-Z0-9_ ]/g, '');
+    let arrData = []
+    chunk_size = 999; // Size depend on row allow per api limit request in cloud ... e.g My basic plan allow only 999 rows per request
+
+    this._mongoDocs.unshift({ '_id': 0, 'chunk_size': chunk_size })
+    console.log(this._dataErrorsCount);
+    console.log(this._dataErrors);
+    for (let index = 0; index < this._mongoDocs.length; index += chunk_size) {
+      arrData.push(this._mongoDocs.slice(index, index + chunk_size));
+
+    }
+    for (let i = 0; i < arrData.length; i++) {
+      await this.getTitle(arrData[i], i, mongoColName).then((res) => {
+        console.log(res);
+      })
+    }
   }
 
   async receiveMessage($event) {
@@ -123,16 +129,19 @@ export class FileUploadComponent implements OnInit {
       worker: ref._filemb > 50 ? true : false,
       header: true,
       step: function (row) {
-        if (row.data.length === undefined) {
-          row.data['Error'] = 'Passed';
+        if (row.data.length === undefined) { // Skip the blank rows
+          // row.data['Error'] = 'Passed';
+          row.data['_id'] = i;
           if (row.errors.length > 0) {
-           
+            let err = {};
             ref._dataErrorsCount++;
-            row.data['Error'] = 'Failed:' + JSON.stringify(row.errors);
+            err['_id'] = i;
+            err['Error'] = 'Failed:' + JSON.stringify(row.errors);
+            ref._dataErrors.push(err);
             //console.log(i);
           }
-          row.data['_id'] = i;
-          ref._csvData.push(row.data);
+
+          ref._mongoDocs.push(row.data);
           i++;
         }
         else {
@@ -140,7 +149,8 @@ export class FileUploadComponent implements OnInit {
         }
       },
       complete: function () {
-        ref._mongoDocs = ref._csvData;
+        console.log('Completed');
+        // ref._mongoDocs = ref._csvData;
         // // Set _paginationCount for default
         // ref._paginationCount = ref.get_paginationCount(ref._mongoDocs.length);
         // ref._mongoDocsCol = Object.keys(ref._cloneDocsData[0]).map((key) => {

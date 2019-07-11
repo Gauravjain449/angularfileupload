@@ -1,5 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ConfirmDialogService } from '../confirmation-dialog/confirmation-dialog.service';
+import axios from 'axios';
+
 
 @Component({
     selector: 'app-custom-table',
@@ -186,8 +188,40 @@ export class CustomTable implements OnInit {
         this.messageEvent.emit(this._trackData)
         //this.messageEvent.emit(this._mongoDocs)
     }
-    onAddSubmit() {
-        this.messageEvent.emit(this._mongoDocs)
+    async onAddSubmit() {
+        // this.messageEvent.emit(this._mongoDocs)
+        var today = new Date();
+        let chunk_size: number = 4000;//this._filemb <= 1.5 ? this._mongoDocs.length + 1 : (this._mongoDocs.length / (this._filemb * 2));
+        // let mongoColName = this._fileName.replace(/[^-a-zA-Z0-9_ ]/g, '') + '_' + today.getFullYear() + (today.getMonth() + 1) + today.getDate() + today.getHours() + today.getMinutes() + today.getSeconds();
+        let mongoColName = 'XYZ';//this._fileName.replace(/[^-a-zA-Z0-9_ ]/g, '');
+        let arrData = []
+        this._mongoDocs.unshift({ '_id': 0, 'chunk_size': chunk_size })
+        for (let index = 0; index < this._mongoDocs.length; index += chunk_size) {
+            arrData.push(this._mongoDocs.slice(index, index + chunk_size));
+        }
+        for (let i = 0; i < arrData.length; i++) {
+            await this.getTitle(arrData[i], i, mongoColName).then((res) => {
+                console.log(res);
+            })
+        }
+    }
+    getTitle = (rows, index, mongoColName) => {
+        return new Promise((resolve, reject) => {
+            axios({
+                method: 'post',
+                url: 'http://localhost:5000/addrecords', headers: {},
+                data: {
+                    foo: rows,
+                    index: index, // This is the body part
+                    mongoColName: mongoColName
+                }
+            }).then(response => {
+                return resolve(response.data)
+            })
+                .catch(error => {
+                    return reject(error.message)
+                })
+        })
     }
 
 
