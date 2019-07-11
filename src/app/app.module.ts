@@ -9,6 +9,7 @@ import { AgGridModule } from 'ag-grid-angular';
 import { AppRoutingModule } from './app-routing.module';
 import { FileUploadComponent } from './file-upload/file-upload.component';
 import { FileUpdateComponent } from './file-update/file-update.component';
+import { CustomTable } from './custom-table/custom.table.component';
 import { PipeNumber } from './pipe/pipe.number';
 import { ConfirmDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 import { ConfirmDialogService } from './confirmation-dialog/confirmation-dialog.service';
@@ -22,6 +23,7 @@ import { ConfirmDialogService } from './confirmation-dialog/confirmation-dialog.
     AppComponent,
     FileUploadComponent,
     FileUpdateComponent,
+    CustomTable,
     PipeNumber,
     ConfirmDialogComponent
   ],
@@ -33,8 +35,6 @@ import { ConfirmDialogService } from './confirmation-dialog/confirmation-dialog.
     ReactiveFormsModule,
     AgGridModule.withComponents([]),
     JSONTableModule
-
-
   ],
   entryComponents: [
 
