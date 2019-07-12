@@ -9,8 +9,8 @@ app.use(bodyParser.json({ limit: '10mb', extended: true }))
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }))
 app.use(cors())
 
-//var url = 'mongodb://localhost/';
-var url = "mongodb://gauravjain449:vxj6nkuYBmnaTobGucZORzXaanJHzFYcVmyGGpdlsjz94G4hCFP6mv1vCh4n3r5qQDVGIHxvp0NJ8nN9QdA1xg==@gauravjain449.documents.azure.com:10255/?ssl=true";
+var url = 'mongodb://localhost/';
+//var url = "mongodb://gauravjain449:vxj6nkuYBmnaTobGucZORzXaanJHzFYcVmyGGpdlsjz94G4hCFP6mv1vCh4n3r5qQDVGIHxvp0NJ8nN9QdA1xg==@gauravjain449.documents.azure.com:10255/?ssl=true";
 var str = "";
 
 
