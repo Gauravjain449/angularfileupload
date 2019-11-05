@@ -17,7 +17,7 @@
     "express": "^4.17.0",
     "express-fileupload": "^1.1.4",
     "mongodb": "^2.2.36",
-    "mongoose": "^5.5.8"
+    "mongoose": "^5.7.5"
   },
   "devDependencies": {
     "concurrently": "^4.1.0",
